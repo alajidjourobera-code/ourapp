@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Week 6 — Database Integration Demo (Mock)</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f6fa;
+      margin: 0;
+      padding: 30px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+    }
+
+    .container {
+      max-width: 650px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 25px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      padding: 10px 15px;
+      background: #3498db;
+      border: none;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background: #2980b9;
+    }
+
+    #protected,
+    #dashboard,
+    #reminderForm,
+    #examForm,
+    #assignmentForm {
+      display: none;
+      margin-top: 20px;
+    }
+
+    .user-card {
+      background: #ecf0f1;
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+
+    .box {
+      background: #ecf0f1;
+      padding: 12px;
+      border-radius: 6px;
+      margin-top: 10px;
+    }
+
+    .note {
+      font-size: 13px;
+      color: #7f8c8d;
+      margin-top: 20px;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>Week 6 — Database Integration Demo (Mock)</h1>
+
+<div class="container">
+
+  <!-- LOGIN SECTION -->
+  <div id="login-section">
+    <h3>Login</h3>
+
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="mockLogin()">Login</button>
+  </div>
+
+  <!-- DASHBOARD SECTION -->
+  <div id="dashboard">
+    <h3>Dashboard</h3>
+    <p id="welcome"></p>
+
+    <button onclick="showPage('protected')">Show Users</button>
+    <button onclick="showPage('reminderForm')">Add Reminder</button>
+    <button onclick="showPage('examForm')">Add Exam Date</button>
+    <button onclick="showPage('assignmentForm')">Add Assignment</button>
+
+    <button onclick="logout()" style="background:#e74c3c;">Logout</button>
+  </div>
+
+  <!-- USERS SECTION -->
+  <div id="protected">
+    <h3>All users (from DB export)</h3>
+    <div id="users"></div>
+  </div>
+
+  <!-- REMINDER FORM -->
+  <div id="reminderForm">
+    <h3>Add Reminder</h3>
+    <input type="text" id="reminderText" placeholder="Reminder text">
+    <button onclick="addReminder()">Save Reminder</button>
+    <div id="reminderOutput"></div>
+  </div>
+
+  <!-- EXAM FORM -->
+  <div id="examForm">
+    <h3>Add Exam Date</h3>
+    <input type="text" id="examName" placeholder="Course Name">
+    <input type="date" id="examDate">
+    <button onclick="addExam()">Save Exam</button>
+    <div id="examOutput"></div>
+  </div>
+
+  <!-- ASSIGNMENT FORM -->
+  <div id="assignmentForm">
+    <h3>Add Assignment Submission</h3>
+    <input type="text" id="assignCourse" placeholder="Course Name">
+    <input type="date" id="assignDate">
+    <textarea id="assignDetails" placeholder="Assignment details"></textarea>
+    <button onclick="addAssignment()">Save Assignment</button>
+    <div id="assignOutput"></div>
+  </div>
+
+</div>
+
+<p class="note">
+  All data here is mock. Real database insert will be done in Week 7 (backend).
+</p>
+
+<script>
+  function mockLogin() {
+    let email = document.getElementById("email").value.trim();
+    let password = document.getElementById("password").value.trim();
+
+    if (email === "" || password === "") {
+      alert("Please enter both fields!");
+      return;
+    }
+
+    document.getElementById("login-section").style.display = "none";
+    document.getElementById("dashboard").style.display = "block";
+
+    document.getElementById("welcome").innerHTML =
+      "Welcome, " + email + "!";
+  }
+
+  function logout() {
+    location.reload();
+  }
+
+  function showPage(page) {
+    document.getElementById("protected").style.display = "none";
+    document.getElementById("reminderForm").style.display = "none";
+    document.getElementById("examForm").style.display = "none";
+    document.getElementById("assignmentForm").style.display = "none";
+
+    document.getElementById(page).style.display = "block";
+
+    if (page === "protected") {
+      loadUsers();
+    }
+  }
+
+  // ====== USERS FROM data.json ======
+  function loadUsers() {
+    fetch("data.json")
+      .then(res => res.json())
+      .then(data => {
+        let out = "";
+        data.forEach(u => {
+          out += `<div class="user-card">
+                    <strong>${u.name}</strong><br>${u.email}
+                  </div>`;
+        });
+        document.getElementById("users").innerHTML = out;
+      });
+  }
+
+  // ====== REMINDER ======
+  function addReminder() {
+    let text = document.getElementById("reminderText").value;
+    if (text === "") return alert("Enter reminder!");
+
+    document.getElementById("reminderOutput").innerHTML =
+      `<div class="box"><strong>Reminder:</strong> ${text}</div>`;
+  }
+
+  // ====== EXAM ======
+  function addExam() {
+    let course = document.getElementById("examName").value;
+    let date = document.getElementById("examDate").value;
+
+    if (course === "" || date === "") return alert("Fill all fields");
+
+    document.getElementById("examOutput").innerHTML =
+      `<div class="box"><strong>${course}</strong> exam on ${date}</div>`;
+  }
+
+  // ====== ASSIGNMENT ======
+  function addAssignment() {
+    let course = document.getElementById("assignCourse").value;
+    let date = document.getElementById("assignDate").value;
+    let details = document.getElementById("assignDetails").value;
+
+    if (!course || !date || !details)
+      return alert("Please fill everything");
+
+    document.getElementById("assignOutput").innerHTML =
+      `<div class="box">
+        <strong>${course}</strong><br>
+        Due: ${date}<br>
+        ${details}
+      </div>`;
+  }
+</script>
+
+</body>
+</html>
